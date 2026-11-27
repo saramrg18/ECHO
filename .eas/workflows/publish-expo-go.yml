@@ -1,0 +1,13 @@
+name: Publish for Expo Go
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  publish:
+    name: Publish update
+    type: update
+    params:
+      branch: main
+      message: 'HEXFORT desde GitHub'

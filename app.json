@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "HEXFORT",
-    "slug": "echo",
+    "slug": "hexfort",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -32,6 +32,15 @@
       "expo-asset"
     ],
     "scheme": "echo",
-    "backgroundColor": "#090C13"
+    "backgroundColor": "#090C13",
+    "owner": "smrg18s-team",
+    "extra": {
+      "eas": {
+        "projectId": "3fd21a8c-8d17-4b7e-8c28-02147e73d235"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3fd21a8c-8d17-4b7e-8c28-02147e73d235"
+    }
   }
 }
