@@ -14,7 +14,6 @@ export function Screen({ children, style }: { children: React.ReactNode; style?:
         style,
       ]}
     >
-      <View pointerEvents="none" style={styles.glow} />
       {children}
     </View>
   );
@@ -39,15 +38,6 @@ export function TopBar({ title, onBack, right }: { title?: string; onBack?: () =
 }
 
 const styles = StyleSheet.create({
-  glow: {
-    position: 'absolute',
-    top: -200,
-    alignSelf: 'center',
-    width: 520,
-    height: 420,
-    borderRadius: 260,
-    backgroundColor: 'rgba(45,226,255,0.045)',
-  },
   bar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 56 },
   back: { width: 44, height: 44, justifyContent: 'center' },
   title: { flex: 1, textAlign: 'center', color: colors.text, fontSize: 17, fontWeight: '600', letterSpacing: 0.5 },

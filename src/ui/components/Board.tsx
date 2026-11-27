@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { delta, isDoorOpen, type Direction, type GameState, type StepEvent, type Tile, type Vec } from '../../engine';
 import { colors, motion } from '../theme';
@@ -224,7 +224,7 @@ function TileView({
 }
 
 function ExitMark({ cell }: { cell: number }) {
-  const pulse = useRef(new Animated.Value(0)).current;
+  const pulse = useState(() => new Animated.Value(0))[0];
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([
@@ -265,10 +265,10 @@ function ExitMark({ cell }: { cell: number }) {
 /* ---------------- player piece + echo effects ---------------- */
 
 function Piece({ state, cell, nextEcho, version }: { state: GameState; cell: number; nextEcho?: Direction; version: number }) {
-  const pos = useRef(new Animated.ValueXY({ x: state.player.x * cell, y: state.player.y * cell })).current;
-  const echoGlow = useRef(new Animated.Value(0)).current;
-  const ghostOpacity = useRef(new Animated.Value(0)).current;
-  const ghostPos = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const pos = useState(() => new Animated.ValueXY({ x: state.player.x * cell, y: state.player.y * cell }))[0];
+  const echoGlow = useState(() => new Animated.Value(0))[0];
+  const ghostOpacity = useState(() => new Animated.Value(0))[0];
+  const ghostPos = useState(() => new Animated.ValueXY({ x: 0, y: 0 }))[0];
   const lastCell = useRef(cell);
 
   useEffect(() => {

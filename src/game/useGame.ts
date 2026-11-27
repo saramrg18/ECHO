@@ -1,5 +1,5 @@
 /** React binding for the engine: session state, undo/restart and feedback cues. */
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   canUndo,
   createSession,
@@ -18,12 +18,12 @@ export function useGame(level: Level, settings: Settings, onWin?: (moves: number
   const [session, setSession] = useState<GameSession>(() => createSession(level));
   const [version, setVersion] = useState(0);
   const ref = useRef(session);
-  ref.current = session;
-  const opts = { sound: settings.sound, haptics: settings.haptics };
-  const optsRef = useRef(opts);
-  optsRef.current = opts;
+  const optsRef = useRef({ sound: settings.sound, haptics: settings.haptics });
   const winRef = useRef(onWin);
-  winRef.current = onWin;
+  useLayoutEffect(() => {
+    optsRef.current = { sound: settings.sound, haptics: settings.haptics };
+    winRef.current = onWin;
+  });
 
   const commit = (s: GameSession) => {
     ref.current = s;

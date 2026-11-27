@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { PanResponder, View, type ViewProps } from 'react-native';
 import type { Direction } from '../../engine';
 
@@ -7,10 +7,14 @@ const MIN_DISTANCE = 18;
 /** Detects swipes anywhere inside it and reports a direction (one move per swipe). */
 export function SwipeArea({ onSwipe, enabled = true, ...rest }: ViewProps & { onSwipe: (d: Direction) => void; enabled?: boolean }) {
   const cb = useRef(onSwipe);
-  cb.current = onSwipe;
   const on = useRef(enabled);
-  on.current = enabled;
+  useLayoutEffect(() => {
+    cb.current = onSwipe;
+    on.current = enabled;
+  });
 
+  // The handlers only read the refs when a gesture happens, never during render.
+  /* eslint-disable react-hooks/refs */
   const responder = useMemo(
     () =>
       PanResponder.create({
@@ -27,5 +31,6 @@ export function SwipeArea({ onSwipe, enabled = true, ...rest }: ViewProps & { on
       }),
     [],
   );
+  /* eslint-enable react-hooks/refs */
   return <View {...rest} {...responder.panHandlers} />;
 }

@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius } from '../theme';
 
 export function ToggleRow({ label, detail, value, onChange }: { label: string; detail?: string; value: boolean; onChange: (v: boolean) => void }) {
-  const t = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const t = useState(() => new Animated.Value(value ? 1 : 0))[0];
   useEffect(() => {
     Animated.timing(t, { toValue: value ? 1 : 0, duration: 160, useNativeDriver: false }).start();
   }, [value, t]);

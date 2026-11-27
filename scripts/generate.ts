@@ -95,7 +95,7 @@ while (found.length < wanted && tries < 200000) {
   }
   if (!ok) continue;
   const score = (opt - plainLen) * 3 + Math.log2(r.explored) + opt * 0.3;
-  console.log(JSON.stringify(map), `opt=${opt} plain=${plainLen} states=${r.explored}`, score.toFixed(1));
+  process.stdout.write(`${JSON.stringify(map)} opt=${opt} plain=${plainLen} states=${r.explored} ${score.toFixed(1)}\n`);
   found.push({ score, def, info: `opt=${opt} plain=${plainLen} states=${r.explored}` });
 }
 found.sort((a, b) => b.score - a.score);

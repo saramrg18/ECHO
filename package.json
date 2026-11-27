@@ -25,6 +25,8 @@
     "@react-native/jest-preset": "^0.88.1",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~58.0.4",
     "jest": "^30.5.2",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3"
@@ -35,7 +37,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint",
+    "levels:check": "tsx scripts/lab.ts"
   },
   "private": true,
   "jest": {

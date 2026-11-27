@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
 import { colors } from '../theme';
 
 /** "ECHO" wordmark with trailing cyan echoes. */
 export function Logo({ size = 64 }: { size?: number }) {
-  const t = useRef(new Animated.Value(0)).current;
+  const t = useState(() => new Animated.Value(0))[0];
   useEffect(() => {
     const loop = Animated.loop(
       Animated.sequence([

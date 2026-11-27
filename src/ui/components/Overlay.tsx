@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { colors, radius } from '../theme';
 
 /** Full-screen dimmed overlay with an animated card. */
 export function Overlay({ children, accent }: { children: React.ReactNode; accent?: string }) {
-  const t = useRef(new Animated.Value(0)).current;
+  const t = useState(() => new Animated.Value(0))[0];
   useEffect(() => {
     Animated.timing(t, { toValue: 1, duration: 260, easing: Easing.out(Easing.cubic), useNativeDriver: true }).start();
   }, [t]);
@@ -30,8 +30,8 @@ export function Overlay({ children, accent }: { children: React.ReactNode; accen
 
 /** Expanding rings used by the victory animation. */
 export function VictoryBurst({ color = colors.exit }: { color?: string }) {
-  const rings = [useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current, useRef(new Animated.Value(0)).current];
-  const core = useRef(new Animated.Value(0)).current;
+  const [rings] = useState(() => [0, 1, 2].map(() => new Animated.Value(0)));
+  const core = useState(() => new Animated.Value(0))[0];
   useEffect(() => {
     Animated.parallel([
       Animated.spring(core, { toValue: 1, useNativeDriver: true, speed: 8, bounciness: 12 }),

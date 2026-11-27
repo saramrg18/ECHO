@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useGame } from '../../game/useGame';
 import { getLevel, levelNumber, nextLevelId, worldOf } from '../../levels';
 import { useAppState } from '../../state/AppState';
+import { isUnlocked } from '../../progress/progress';
 import { Board } from '../../ui/components/Board';
 import { Button } from '../../ui/components/Button';
 import { DPad } from '../../ui/components/DPad';
@@ -19,11 +20,13 @@ import type { Level } from '../../engine';
 
 export default function PlayRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { progress, ready } = useAppState();
   const level = id ? getLevel(id) : undefined;
-  if (!level) {
+  if (!ready) return <Screen>{null}</Screen>;
+  if (!level || !isUnlocked(progress, level.id)) {
     return (
       <Screen>
-        <TopBar title="Nivel no encontrado" onBack={() => router.replace('/levels')} />
+        <TopBar title={level ? 'Nivel bloqueado' : 'Nivel no encontrado'} onBack={() => router.replace('/levels')} />
       </Screen>
     );
   }
@@ -35,8 +38,11 @@ function Game({ level }: { level: Level }) {
   const { settings, progress } = app;
   const [paused, setPaused] = useState(false);
   const [win, setWin] = useState<{ moves: number; prevBest?: number } | null>(null);
-  const bestRef = useRef(progress.completed[level.id]?.bestMoves);
-  bestRef.current = progress.completed[level.id]?.bestMoves;
+  const best = progress.completed[level.id]?.bestMoves;
+  const bestRef = useRef(best);
+  useLayoutEffect(() => {
+    bestRef.current = best;
+  }, [best]);
 
   const game = useGame(level, settings, (moves) => {
     setWin({ moves, prevBest: bestRef.current });
