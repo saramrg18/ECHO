@@ -41,6 +41,7 @@
     },
     "updates": {
       "url": "https://u.expo.dev/3fd21a8c-8d17-4b7e-8c28-02147e73d235"
-    }
+    },
+    "runtimeVersion": "exposdk:58.0.0"
   }
 }
