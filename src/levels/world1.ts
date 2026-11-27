@@ -8,6 +8,7 @@ export const world1: WorldDefinition = {
     {
       id: '1',
       name: 'Primer paso',
+      par: 4,
       hint: 'Desliza sobre el tablero o pulsa las flechas para llevar la pieza naranja a la salida.',
       map: [
         '#######',
@@ -18,6 +19,7 @@ export const world1: WorldDefinition = {
     {
       id: '2',
       name: 'Resonancia',
+      par: 6,
       hint: 'Cada movimiento se repite solo 3 turnos después. Aquí el eco te impulsa hacia delante.',
       map: [
         '############',
@@ -28,6 +30,7 @@ export const world1: WorldDefinition = {
     {
       id: '3',
       name: 'Esquina',
+      par: 7,
       hint: 'Si un eco choca contra una pared, se pierde. Arriba ves la cola de próximos ecos.',
       map: [
         '#######',
@@ -42,6 +45,7 @@ export const world1: WorldDefinition = {
     {
       id: '4',
       name: 'Retorno',
+      par: 8,
       hint: 'La flecha cyan junto a tu pieza indica hacia dónde te empujará el eco en el próximo turno.',
       map: [
         '#######',
@@ -54,6 +58,7 @@ export const world1: WorldDefinition = {
     {
       id: '5',
       name: 'Pasillo',
+      par: 9,
       hint: 'En cada turno primero te mueves tú y después llega el eco. Planifica los dos pasos.',
       map: [
         '########',
@@ -68,6 +73,7 @@ export const world1: WorldDefinition = {
     {
       id: '6',
       name: 'Desvío',
+      par: 8,
       hint: 'El camino más corto no siempre funciona. Piensa en lo que repetirá el eco.',
       map: [
         '#######',
@@ -81,6 +87,7 @@ export const world1: WorldDefinition = {
     {
       id: '7',
       name: 'Tan cerca',
+      par: 8,
       map: [
         '######',
         '#..#.#',
@@ -93,6 +100,7 @@ export const world1: WorldDefinition = {
     {
       id: '8',
       name: 'Rebote',
+      par: 8,
       map: [
         '######',
         '#....#',
@@ -106,6 +114,7 @@ export const world1: WorldDefinition = {
     {
       id: '9',
       name: 'Contrapaso',
+      par: 8,
       map: [
         '#######',
         '#..##.#',
@@ -119,6 +128,7 @@ export const world1: WorldDefinition = {
     {
       id: '10',
       name: 'Cadencia',
+      par: 9,
       map: [
         '#######',
         '#.....#',

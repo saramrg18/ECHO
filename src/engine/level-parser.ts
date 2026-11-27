@@ -81,5 +81,6 @@ export function parseLevel(def: LevelDefinition): Level {
     echoDelay,
     maxMoves: def.maxMoves,
     hint: def.hint,
+    par: def.par,
   };
 }

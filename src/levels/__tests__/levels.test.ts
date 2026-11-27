@@ -19,6 +19,8 @@ describe('level catalogue', () => {
       expect(solution).not.toBeNull();
       if (def.maxMoves !== undefined) expect(solution!.length).toBeLessThanOrEqual(def.maxMoves);
       expect(playMoves(level, solution!).status).toBe('won');
+      // par drives the star rating, so it must be the true optimum
+      expect(def.par).toBe(solution!.length);
     });
   });
 

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { LEVEL_ORDER, levelNumber } from '../levels';
+import { LEVEL_ORDER, TOTAL_STARS, levelNumber, levelStars } from '../levels';
 import { completedCount, continueLevel } from '../progress/progress';
 import { useAppState } from '../state/AppState';
 import { Button } from '../ui/components/Button';
@@ -14,6 +14,7 @@ export default function Home() {
   const done = completedCount(progress);
   const total = LEVEL_ORDER.length;
   const next = continueLevel(progress, LEVEL_ORDER);
+  const stars = Object.entries(progress.completed).reduce((s, [id, r]) => s + levelStars(id, r.bestMoves), 0);
   const started = done > 0 || progress.lastPlayed !== undefined;
 
   return (
@@ -28,7 +29,9 @@ export default function Home() {
           <View style={styles.progressRow}>
             <Text style={styles.progressLabel}>Progreso</Text>
             <Text style={styles.progressValue}>
-              {done} <Text style={{ color: colors.textFaint }}>/ {total}</Text>
+              {done} <Text style={{ color: colors.textFaint }}>/ {total} niveles</Text>
+              {'   '}
+              <Text style={{ color: colors.player }}>★</Text> {stars} <Text style={{ color: colors.textFaint }}>/ {TOTAL_STARS}</Text>
             </Text>
           </View>
           <View style={styles.track}>

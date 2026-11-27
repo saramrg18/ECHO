@@ -1,5 +1,5 @@
 /** Level catalogue. Levels are pure data; see engine/level-parser.ts for the map legend. */
-import { parseLevel, type Level, type LevelDefinition } from '../engine';
+import { MAX_STARS, parseLevel, starsFor, type Level, type LevelDefinition, type Stars } from '../engine';
 import type { WorldDefinition } from './types';
 import { world1 } from './world1';
 import { world2 } from './world2';
@@ -35,3 +35,10 @@ export function nextLevelId(id: string): string | undefined {
 export function worldOf(id: string): WorldDefinition | undefined {
   return WORLDS.find((w) => w.levels.some((l) => l.id === id));
 }
+
+/** Stars earned for completing `id` in `moves`. */
+export function levelStars(id: string, moves: number): Stars {
+  return starsFor(moves, getLevel(id)?.par);
+}
+
+export const TOTAL_STARS = LEVEL_ORDER.length * MAX_STARS;

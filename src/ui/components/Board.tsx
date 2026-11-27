@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
-import { delta, isDoorOpen, type Direction, type GameState, type StepEvent, type Tile, type Vec } from '../../engine';
+import { delta, isDoorOpen, samePos, type Direction, type GameState, type MovePreview, type StepEvent, type Tile, type Vec } from '../../engine';
 import { colors, motion } from '../theme';
 import { Arrow } from './Icon';
 
@@ -13,11 +13,15 @@ interface Props {
   nextEcho?: Direction;
   /** Changes on every accepted turn / undo / restart, to trigger animations. */
   version: number;
+  /** Ghost preview of the move being considered. */
+  preview?: MovePreview | null;
+  /** Direction suggested by a hint. */
+  hintDir?: Direction;
 }
 
 const MAX_CELL = 64;
 
-export function Board({ state, maxWidth, maxHeight, nextEcho, version }: Props) {
+export function Board({ state, maxWidth, maxHeight, nextEcho, version, preview, hintDir }: Props) {
   const { board } = state.level;
   const cell = Math.floor(Math.min(maxWidth / board.width, maxHeight / board.height, MAX_CELL));
   const width = cell * board.width;
@@ -26,7 +30,8 @@ export function Board({ state, maxWidth, maxHeight, nextEcho, version }: Props) 
   return (
     <View style={{ width, height }}>
       <StaticTiles state={state} cell={cell} />
-      <Piece state={state} cell={cell} nextEcho={nextEcho} version={version} />
+      {preview ? <GhostPreview preview={preview} cell={cell} /> : null}
+      <Piece state={state} cell={cell} nextEcho={preview ? undefined : nextEcho} version={version} hintDir={preview ? undefined : hintDir} />
     </View>
   );
 }
@@ -264,7 +269,19 @@ function ExitMark({ cell }: { cell: number }) {
 
 /* ---------------- player piece + echo effects ---------------- */
 
-function Piece({ state, cell, nextEcho, version }: { state: GameState; cell: number; nextEcho?: Direction; version: number }) {
+function Piece({
+  state,
+  cell,
+  nextEcho,
+  version,
+  hintDir,
+}: {
+  state: GameState;
+  cell: number;
+  nextEcho?: Direction;
+  version: number;
+  hintDir?: Direction;
+}) {
   const pos = useState(() => new Animated.ValueXY({ x: state.player.x * cell, y: state.player.y * cell }))[0];
   const echoGlow = useState(() => new Animated.Value(0))[0];
   const ghostOpacity = useState(() => new Animated.Value(0))[0];
@@ -346,9 +363,80 @@ function Piece({ state, cell, nextEcho, version }: { state: GameState; cell: num
         >
           <View style={{ width: size * 0.28, height: size * 0.28, borderRadius: size, backgroundColor: 'rgba(255,255,255,0.85)' }} />
         </View>
-        {nextEcho && state.status === 'playing' ? <EchoHint dir={nextEcho} cell={cell} /> : null}
+        {nextEcho && state.status === 'playing' && nextEcho !== hintDir ? <EchoHint dir={nextEcho} cell={cell} /> : null}
+        {hintDir && state.status === 'playing' ? <HintArrow dir={hintDir} cell={cell} /> : null}
       </Animated.View>
     </>
+  );
+}
+
+/** Ghost squares showing where the considered move (and its echo) would leave the piece. */
+function GhostPreview({ preview, cell }: { preview: MovePreview; cell: number }) {
+  const size = cell * 0.62;
+  const own = preview.steps[0];
+  const ghost = (pos: Vec, color: string, dashed: boolean, key: string) => {
+    // the final ghost is drawn slightly larger so it stays visible around the piece
+    const s = dashed ? size : cell * 0.8;
+    const o = (cell - s) / 2;
+    return (
+    <View
+      key={key}
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        left: pos.x * cell + o,
+        top: pos.y * cell + o,
+        width: s,
+        height: s,
+        borderRadius: cell * 0.14,
+        borderWidth: 2,
+        borderStyle: dashed ? 'dashed' : 'solid',
+        borderColor: color,
+        backgroundColor: dashed ? 'transparent' : 'rgba(45,226,255,0.10)',
+      }}
+    />
+    );
+  };
+  const finalColor = preview.status === 'won' ? colors.exit : colors.echo;
+  const echoMoved = !samePos(own.to, preview.final);
+  return (
+    <>
+      {echoMoved || preview.steps.length > 1 ? ghost(own.to, colors.player, true, 'own') : null}
+      {ghost(preview.final, echoMoved || preview.status === 'won' ? finalColor : colors.player, false, 'final')}
+    </>
+  );
+}
+
+/** Pulsing orange chevron suggesting the next move. */
+function HintArrow({ dir, cell }: { dir: Direction; cell: number }) {
+  const [t] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(t, { toValue: 1, duration: 500, useNativeDriver: true }),
+        Animated.timing(t, { toValue: 0, duration: 500, useNativeDriver: true }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [t]);
+  const d = delta(dir);
+  const s = cell * 0.42;
+  return (
+    <Animated.View
+      style={{
+        position: 'absolute',
+        left: cell / 2 - s / 2 + d.x * cell * 0.62,
+        top: cell / 2 - s / 2 + d.y * cell * 0.62,
+        opacity: t.interpolate({ inputRange: [0, 1], outputRange: [0.5, 1] }),
+        transform: [
+          { translateX: t.interpolate({ inputRange: [0, 1], outputRange: [0, d.x * cell * 0.08] }) },
+          { translateY: t.interpolate({ inputRange: [0, 1], outputRange: [0, d.y * cell * 0.08] }) },
+        ],
+      }}
+    >
+      <Arrow dir={dir} size={s} color={colors.player} />
+    </Animated.View>
   );
 }
 

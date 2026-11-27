@@ -52,6 +52,8 @@ export interface LevelDefinition {
   readonly maxMoves?: number;
   /** Short tutorial text shown with the level. */
   readonly hint?: string;
+  /** Optimal number of moves (verified by the solver in tests). Used for star ratings. */
+  readonly par?: number;
 }
 
 /** Parsed, immutable level. */
@@ -63,6 +65,7 @@ export interface Level {
   readonly echoDelay: number;
   readonly maxMoves?: number;
   readonly hint?: string;
+  readonly par?: number;
 }
 
 /** A move waiting in the repetition queue. */

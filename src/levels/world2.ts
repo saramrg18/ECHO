@@ -8,6 +8,7 @@ export const world2: WorldDefinition = {
     {
       id: '11',
       name: 'Interruptor',
+      par: 12,
       hint: 'Pisa un interruptor para abrir o cerrar las puertas de su color. Los ecos también los pisan.',
       map: [
         '#########',
@@ -20,6 +21,7 @@ export const world2: WorldDefinition = {
     {
       id: '12',
       name: 'Cerrojo',
+      par: 13,
       map: [
         '######',
         '##.E.#',
@@ -33,6 +35,7 @@ export const world2: WorldDefinition = {
     {
       id: '13',
       name: 'Dos puertas',
+      par: 10,
       map: [
         '######',
         '#.#..#',
@@ -46,6 +49,7 @@ export const world2: WorldDefinition = {
     {
       id: '14',
       name: 'Grieta',
+      par: 8,
       hint: 'El suelo agrietado se hunde en cuanto lo abandonas. Solo puedes pisarlo una vez.',
       map: [
         '#######',
@@ -59,6 +63,7 @@ export const world2: WorldDefinition = {
     {
       id: '15',
       name: 'Sentido único',
+      par: 8,
       hint: 'Las flechas solo se pueden cruzar en la dirección que marcan.',
       map: [
         '######',
@@ -72,6 +77,7 @@ export const world2: WorldDefinition = {
     {
       id: '16',
       name: 'Silencio',
+      par: 8,
       hint: 'La casilla de silencio borra todos los ecos pendientes.',
       map: [
         '#######',
@@ -85,6 +91,7 @@ export const world2: WorldDefinition = {
     {
       id: '17',
       name: 'Puerta abierta',
+      par: 10,
       hint: 'Algunas puertas empiezan abiertas. Vigila qué interruptores pisa tu eco.',
       map: [
         '######',
@@ -99,6 +106,7 @@ export const world2: WorldDefinition = {
     {
       id: '18',
       name: 'Derrumbe',
+      par: 11,
       hint: 'Este nivel tiene un límite de movimientos.',
       maxMoves: 13,
       map: [
@@ -114,6 +122,7 @@ export const world2: WorldDefinition = {
     {
       id: '19',
       name: 'Corriente',
+      par: 10,
       map: [
         '#######',
         '##v...#',
@@ -126,6 +135,7 @@ export const world2: WorldDefinition = {
     {
       id: '20',
       name: 'Calma',
+      par: 9,
       maxMoves: 11,
       map: [
         '#######',

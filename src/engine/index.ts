@@ -7,3 +7,5 @@ export * from './movement';
 export * from './echo-queue';
 export * from './game';
 export * from './solver';
+export * from './scoring';
+export * from './assist';

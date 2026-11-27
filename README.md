@@ -20,6 +20,12 @@ npm run lint
 - Llegar a la salida (tú o tu eco) gana al instante.
 - Si el nivel tiene límite de movimientos y se agota, se pierde (se puede deshacer).
 
+## Ayudas al jugador
+
+- **Estrellas**: 3 si igualas el óptimo (`par`, verificado por el solver), 2 si te pasas poco y 1 en otro caso.
+- **Vista previa fantasma**: al mantener pulsada una flecha (o pasar el ratón por encima), o mientras deslizas, se ve dónde acabará la pieza (naranja) y dónde la deja el eco (cyan). Si deslizas de vuelta al punto de partida, el movimiento se cancela.
+- **Pistas**: 3 por nivel. Calculan el siguiente movimiento óptimo desde la posición actual, o avisan si ya no se puede ganar.
+
 ## Arquitectura
 
 ```
@@ -32,6 +38,8 @@ src/
     echo-queue.ts    Sistema de repetición (cola de ecos)
     game.ts          Estado de la partida, turnos, deshacer, reiniciar
     solver.ts        BFS: garantiza que cada nivel tiene solución
+    scoring.ts       Estrellas según movimientos y par
+    assist.ts        Vista previa de movimientos y pistas
   levels/      30 niveles como datos, en 3 bloques
   progress/    Progreso del jugador (lógica pura)
   settings/    Ajustes del usuario

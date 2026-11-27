@@ -1,9 +1,12 @@
 import React from 'react';
-import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Platform, StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '../theme';
 import { Arrow } from './Icon';
 import { Tap } from './Pressable';
+
+// On web, dragging must not select text: a selection change cancels the swipe gesture.
+const noSelect = Platform.OS === 'web' ? ({ userSelect: 'none' } as unknown as ViewStyle) : null;
 
 export function Screen({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
   const insets = useSafeAreaInsets();
@@ -11,6 +14,7 @@ export function Screen({ children, style }: { children: React.ReactNode; style?:
     <View
       style={[
         { flex: 1, backgroundColor: colors.bg, paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 12) },
+        noSelect,
         style,
       ]}
     >
@@ -39,6 +43,6 @@ export function TopBar({ title, onBack, right }: { title?: string; onBack?: () =
 
 const styles = StyleSheet.create({
   bar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 56 },
-  back: { width: 44, height: 44, justifyContent: 'center' },
+  back: { width: 104, height: 44, justifyContent: 'center' },
   title: { flex: 1, textAlign: 'center', color: colors.text, fontSize: 17, fontWeight: '600', letterSpacing: 0.5 },
 });

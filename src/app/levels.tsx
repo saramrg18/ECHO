@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { WORLDS, levelNumber } from '../levels';
+import { WORLDS, levelNumber, levelStars } from '../levels';
 import { isUnlocked } from '../progress/progress';
 import { useAppState } from '../state/AppState';
-import { CheckIcon, LockIcon } from '../ui/components/Icon';
+import { LockIcon } from '../ui/components/Icon';
+import { StarRow } from '../ui/components/Stars';
 import { Tap } from '../ui/components/Pressable';
 import { Screen, TopBar } from '../ui/components/Screen';
 import { colors, radius } from '../ui/theme';
@@ -37,7 +38,7 @@ export default function Levels() {
                       key={l.id}
                       accessibilityRole="button"
                       accessibilityLabel={
-                        unlocked ? `Nivel ${n}${rec ? `, completado en ${rec.bestMoves} movimientos` : ''}` : `Nivel ${n}, bloqueado`
+                        unlocked ? `Nivel ${n}${rec ? `, completado en ${rec.bestMoves} movimientos, ${levelStars(l.id, rec.bestMoves)} estrellas` : ''}` : `Nivel ${n}, bloqueado`
                       }
                       disabled={!unlocked}
                       onPress={() => router.push({ pathname: '/play/[id]', params: { id: l.id } })}
@@ -47,9 +48,9 @@ export default function Levels() {
                         <>
                           <Text style={[styles.num, rec && { color: colors.text }]}>{n}</Text>
                           {rec ? (
-                            <View style={styles.meta}>
-                              <CheckIcon size={10} color={colors.exit} />
-                              <Text style={styles.moves}>{rec.bestMoves}</Text>
+                            <View style={styles.metaCol}>
+                              <StarRow stars={levelStars(l.id, rec.bestMoves)} size={10} />
+                              <Text style={styles.moves}>{rec.bestMoves} mov.</Text>
                             </View>
                           ) : (
                             <View style={styles.meta}>
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   cell: {
     width: 58,
-    height: 64,
+    height: 72,
     borderRadius: radius.md,
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -95,7 +96,8 @@ const styles = StyleSheet.create({
   cellDone: { borderColor: 'rgba(92,255,176,0.35)' },
   cellLocked: { backgroundColor: colors.bgElevated, borderColor: colors.bgElevated },
   num: { color: colors.textDim, fontSize: 18, fontWeight: '700', fontVariant: ['tabular-nums'] },
+  metaCol: { alignItems: 'center', gap: 1 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 3, height: 12 },
-  moves: { color: colors.textDim, fontSize: 11, fontVariant: ['tabular-nums'] },
+  moves: { color: colors.textFaint, fontSize: 10, fontVariant: ['tabular-nums'] },
   dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.player },
 });

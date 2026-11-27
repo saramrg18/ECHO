@@ -1,8 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useGame } from '../../game/useGame';
-import { getLevel, levelNumber, nextLevelId, worldOf } from '../../levels';
+import { getLevel, levelNumber, levelStars, nextLevelId, worldOf } from '../../levels';
+import { StarRow } from '../../ui/components/Stars';
 import { useAppState } from '../../state/AppState';
 import { isUnlocked } from '../../progress/progress';
 import { Board } from '../../ui/components/Board';
@@ -16,7 +17,9 @@ import { SwipeArea } from '../../ui/components/SwipeArea';
 import { ToggleRow } from '../../ui/components/Toggle';
 import { Tap } from '../../ui/components/Pressable';
 import { colors, radius } from '../../ui/theme';
-import type { Level } from '../../engine';
+import { nextHint, previewMove, type Direction, type Hint, type Level } from '../../engine';
+
+const HINTS_PER_LEVEL = 3;
 
 export default function PlayRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -63,6 +66,25 @@ function Game({ level }: { level: Level }) {
   const playing = state.status === 'playing' && !paused;
   const showHint = Boolean(level.hint) && !win;
 
+  // Ghost preview of the move being considered (held button, hover or swipe in progress).
+  const [previewDir, setPreviewDir] = useState<Direction | null>(null);
+  const preview = useMemo(
+    () => (previewDir && playing ? previewMove(state, previewDir) : null),
+    [previewDir, playing, state],
+  );
+
+  // Hints: limited per level visit; a hint is only valid for the turn it was asked on.
+  const [hintsLeft, setHintsLeft] = useState(HINTS_PER_LEVEL);
+  const [hint, setHint] = useState<{ version: number; hint: Hint } | null>(null);
+  const activeHint = hint && hint.version === game.version ? hint.hint : null;
+  const hintDir = activeHint?.kind === 'move' ? activeHint.dir : undefined;
+  const askHint = () => {
+    if (!playing || activeHint) return;
+    const h = nextHint(state);
+    setHint({ version: game.version, hint: h });
+    if (h.kind === 'move') setHintsLeft((n) => n - 1);
+  };
+
   const replay = () => {
     setWin(null);
     game.restart();
@@ -74,9 +96,22 @@ function Game({ level }: { level: Level }) {
         title={`Nivel ${n}`}
         onBack={() => router.back()}
         right={
-          <Tap accessibilityRole="button" accessibilityLabel="Pausa" onPress={() => setPaused(true)} style={styles.iconBtn} hitSlop={8}>
-            <PauseIcon size={16} color={colors.text} />
-          </Tap>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Tap
+              accessibilityRole="button"
+              accessibilityLabel={`Pista, quedan ${hintsLeft}`}
+              onPress={askHint}
+              disabled={hintsLeft === 0 || !playing}
+              style={[styles.iconBtn, styles.hintBtn]}
+              hitSlop={8}
+            >
+              <Text style={styles.hintBtnText}>?</Text>
+              <Text style={styles.hintCount}>{hintsLeft}</Text>
+            </Tap>
+            <Tap accessibilityRole="button" accessibilityLabel="Pausa" onPress={() => setPaused(true)} style={styles.iconBtn} hitSlop={8}>
+              <PauseIcon size={16} color={colors.text} />
+            </Tap>
+          </View>
         }
       />
       <Text style={styles.levelName}>
@@ -100,7 +135,11 @@ function Game({ level }: { level: Level }) {
         <EchoQueue upcoming={game.upcoming} delay={level.echoDelay} />
       </View>
 
-      {showHint ? (
+      {activeHint?.kind === 'stuck' ? (
+        <View style={[styles.hint, styles.stuck]}>
+          <Text style={styles.hintText}>Desde aquí ya no se puede llegar a la salida. Deshaz o reinicia.</Text>
+        </View>
+      ) : showHint ? (
         <View style={styles.hint}>
           <Text style={styles.hintText}>{level.hint}</Text>
         </View>
@@ -109,6 +148,7 @@ function Game({ level }: { level: Level }) {
       <SwipeArea
         enabled={playing}
         onSwipe={game.move}
+        onPreview={setPreviewDir}
         style={styles.boardArea}
         onLayout={(e) => setArea({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
       >
@@ -118,6 +158,8 @@ function Game({ level }: { level: Level }) {
             maxWidth={area.w - 24}
             maxHeight={area.h - 16}
             nextEcho={nextEcho}
+            preview={preview}
+            hintDir={hintDir}
             version={game.version}
           />
         ) : null}
@@ -130,7 +172,7 @@ function Game({ level }: { level: Level }) {
           onPress={game.undo}
           disabled={!game.canUndo || Boolean(win)}
         />
-        {settings.showDpad ? <DPad onPress={game.move} disabled={!playing} size={58} /> : <Text style={styles.swipeHint}>Desliza para mover</Text>}
+        {settings.showDpad ? <DPad onPress={game.move} onPreview={setPreviewDir} highlight={hintDir} disabled={!playing} size={58} /> : <Text style={styles.swipeHint}>Desliza para mover</Text>}
         <Button accessibilityLabel="Reiniciar" icon={<RestartIcon size={20} color={colors.text} />} onPress={game.restart} disabled={state.turn === 0} />
       </View>
 
@@ -167,10 +209,16 @@ function Game({ level }: { level: Level }) {
         <Overlay accent="rgba(92,255,176,0.4)">
           <VictoryBurst />
           <Text style={styles.ovTitle}>Nivel completado</Text>
+          <StarRow stars={levelStars(level.id, win.moves)} size={30} animated />
           <View style={styles.result}>
             <Text style={styles.resultValue}>{win.moves}</Text>
             <Text style={styles.resultLabel}>movimientos</Text>
           </View>
+          {level.par !== undefined ? (
+            <Text style={styles.ovText}>
+              {win.moves <= level.par ? 'Solución óptima.' : `Se puede resolver en ${level.par} movimientos.`}
+            </Text>
+          ) : null}
           <Text style={styles.ovText}>
             {win.prevBest === undefined
               ? 'Primer intento superado.'
@@ -207,6 +255,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  hintBtn: { width: 52, flexDirection: 'row', gap: 4 },
+  hintBtnText: { color: colors.player, fontSize: 16, fontWeight: '800' },
+  hintCount: { color: colors.textDim, fontSize: 12, fontVariant: ['tabular-nums'] },
+  stuck: { backgroundColor: 'rgba(255,138,61,0.08)', borderColor: 'rgba(255,138,61,0.3)' },
   levelName: { textAlign: 'center', color: colors.textDim, fontSize: 14, marginTop: -6 },
   hud: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 20, marginTop: 16, gap: 22 },
   stat: { gap: 4 },

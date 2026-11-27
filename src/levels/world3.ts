@@ -8,6 +8,7 @@ export const world3: WorldDefinition = {
     {
       id: '21',
       name: 'Dos llaves',
+      par: 11,
       hint: 'Dos colores, dos mecanismos. Cada interruptor solo controla las puertas de su color.',
       map: [
         '#######',
@@ -22,6 +23,7 @@ export const world3: WorldDefinition = {
     {
       id: '22',
       name: 'Laberinto corto',
+      par: 14,
       map: [
         '######',
         '##...#',
@@ -34,6 +36,7 @@ export const world3: WorldDefinition = {
     {
       id: '23',
       name: 'Sin retorno',
+      par: 13,
       maxMoves: 15,
       map: [
         '#######',
@@ -48,6 +51,7 @@ export const world3: WorldDefinition = {
     {
       id: '24',
       name: 'Bisagra',
+      par: 11,
       map: [
         '#######',
         '##....#',
@@ -62,6 +66,7 @@ export const world3: WorldDefinition = {
     {
       id: '25',
       name: 'Engranaje',
+      par: 12,
       map: [
         '#######',
         '#EAb.##',
@@ -76,6 +81,7 @@ export const world3: WorldDefinition = {
     {
       id: '26',
       name: 'Relevo',
+      par: 14,
       maxMoves: 16,
       map: [
         '#######',
@@ -91,6 +97,7 @@ export const world3: WorldDefinition = {
     {
       id: '27',
       name: 'Paralaje',
+      par: 15,
       map: [
         '#######',
         '#A.E#.#',
@@ -104,6 +111,7 @@ export const world3: WorldDefinition = {
     {
       id: '28',
       name: 'Mecanismo',
+      par: 16,
       maxMoves: 17,
       map: [
         '#######',
@@ -118,6 +126,7 @@ export const world3: WorldDefinition = {
     {
       id: '29',
       name: 'Todo vuelve',
+      par: 15,
       map: [
         '#######',
         '#.a...#',
@@ -133,6 +142,7 @@ export const world3: WorldDefinition = {
     {
       id: '30',
       name: 'Eco final',
+      par: 18,
       maxMoves: 19,
       map: [
         '#######',
