@@ -1,0 +1,30 @@
+export const hx = {
+  bg: '#0E1A2E',
+  panel: '#16263F',
+  panelHigh: '#1E3354',
+  border: '#2C4670',
+  text: '#F4F7FF',
+  dim: '#A3B4D1',
+  faint: '#6B7FA3',
+  gold: '#FFC93C',
+  goldDark: '#B8860B',
+  player: '#3D8BFF',
+  ai: '#FF4B55',
+  energy: '#B46BFF',
+  good: '#59D98E',
+  tower: '#3D8BFF',
+  spell: '#B46BFF',
+};
+
+export const CARD_ICON: Record<string, string> = {
+  guard: '🛡️',
+  archer: '🏹',
+  barracks: '⛺',
+  mine: '💎',
+  catapult: '🪨',
+  reinforce: '➕',
+  fireball: '🔥',
+  shield: '🔰',
+  rally: '📯',
+  quake: '💥',
+};

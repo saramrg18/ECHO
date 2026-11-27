@@ -2,12 +2,14 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { View } from 'react-native';
+import { HexProvider } from '../hexfort/state/HexState';
 import { AppStateProvider } from '../state/AppState';
 import { colors } from '../ui/theme';
 
 export default function RootLayout() {
   return (
     <AppStateProvider>
+      <HexProvider>
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
         <StatusBar style="light" />
         <Stack
@@ -18,6 +20,7 @@ export default function RootLayout() {
           }}
         />
       </View>
+      </HexProvider>
     </AppStateProvider>
   );
 }

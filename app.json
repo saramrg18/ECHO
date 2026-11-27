@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ECHO",
+    "name": "HEXFORT",
     "slug": "echo",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -28,7 +28,8 @@
     "plugins": [
       "expo-router",
       "expo-audio",
-      "expo-font"
+      "expo-font",
+      "expo-asset"
     ],
     "scheme": "echo",
     "backgroundColor": "#090C13"
