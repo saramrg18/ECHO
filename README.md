@@ -1,3 +1,20 @@
+# HEXFORT
+
+Estrategia por turnos en 3D low-poly (React Native + Expo + TypeScript + three.js / react-three-fiber).
+Conquista casillas de un mapa hexagonal, construye torres con cartas y combínalas para ganar sinergias.
+Ganas al capturar el castillo rival.
+
+- **Turno**: recibes tropas (colócalas en tus casillas), mueves cada casilla una vez (siempre se queda 1 tropa) y juegas cartas con energía.
+- **Combate**: si atacas con más tropas que la defensa (tropas + bonus de torre, castillo, bosque o colina), conquistas; si no, desgastas al defensor.
+- **Cartas**: torres (guardia, arqueros, cuartel, mina, catapulta) y hechizos (refuerzos, bola de fuego, escudo, grito de guerra, terremoto).
+- **Sinergias**: torres vecinas se potencian (Muralla, Fortín, Campamento, Armería, Filón, Artillería).
+- **Campaña**: 5 mapas; cada victoria desbloquea cartas nuevas para tu mazo de 12.
+
+Código: `src/hexfort/engine` (motor puro en TS, con tests e IA), `src/hexfort/three` (tablero 3D, modelos generados en código),
+`src/hexfort/ui` y rutas en `src/app/index.tsx` y `src/app/hexfort/`. El juego anterior, ECHO, sigue disponible en `/echo`.
+
+---
+
 # ECHO
 
 Juego de estrategia y lógica para iOS y Android (React Native + Expo + TypeScript).

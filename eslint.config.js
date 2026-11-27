@@ -7,4 +7,9 @@ module.exports = defineConfig([
   {
     ignores: ['dist/*'],
   },
+  {
+    // three.js JSX props (geometry, args, attach...) are not DOM props.
+    files: ['src/hexfort/three/**'],
+    rules: { 'react/no-unknown-property': 'off' },
+  },
 ]);
