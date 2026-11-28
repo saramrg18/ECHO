@@ -10,4 +10,4 @@ jobs:
     type: update
     params:
       branch: main
-      message: 'HEXFORT desde GitHub'
+      message: 'MAREAS desde GitHub'
