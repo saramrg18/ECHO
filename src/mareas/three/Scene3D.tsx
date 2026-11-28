@@ -74,15 +74,26 @@ export const Scene3D = memo(function Scene3D(props: SceneProps) {
   const colors = seaById(sea).colors;
   const camRef = useRef<THREE.Camera | null>(null);
   const size = useRef({ w: 1, h: 1 });
+  const box = useRef<React.ComponentRef<typeof View>>(null);
+  /** Where the scene sits on screen, so a tap's page position can be turned into scene coordinates. */
+  const origin = useRef({ x: 0, y: 0 });
+  const measure = () =>
+    box.current?.measureInWindow((x, y, w, h) => {
+      origin.current = { x, y };
+      if (w > 0 && h > 0) size.current = { w, h };
+    });
 
   const onLayout = (e: LayoutChangeEvent) => {
     size.current = { w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height };
+    measure();
   };
 
   const onRelease = (e: GestureResponderEvent) => {
     const cam = camRef.current;
     if (!cam || !selecting || !onLaneTap) return;
-    const { locationX, locationY } = e.nativeEvent;
+    // Page coordinates are reliable whichever child view (the GL canvas) was touched.
+    const locationX = e.nativeEvent.pageX - origin.current.x;
+    const locationY = e.nativeEvent.pageY - origin.current.y;
     const ndc = new THREE.Vector2((locationX / size.current.w) * 2 - 1, -(locationY / size.current.h) * 2 + 1);
     const ray = new THREE.Raycaster();
     ray.setFromCamera(ndc, cam);
@@ -95,9 +106,16 @@ export const Scene3D = memo(function Scene3D(props: SceneProps) {
 
   return (
     <View
+      ref={box}
       style={styles.fill}
       onLayout={onLayout}
-      onStartShouldSetResponder={() => !!selecting}
+      // Capture phase: the native r3f canvas claims every touch for itself, so a plain
+      // onStartShouldSetResponder here never fires on a phone. While a card is selected
+      // the scene takes the tap first.
+      onStartShouldSetResponderCapture={() => !!selecting}
+      onMoveShouldSetResponderCapture={() => !!selecting}
+      onResponderTerminationRequest={() => false}
+      onResponderGrant={measure}
       onResponderRelease={onRelease}
     >
       <Canvas style={styles.fill} camera={{ fov: 40, near: 0.1, far: 200, position: [0, 14, 14] }}>
