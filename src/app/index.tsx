@@ -1,115 +1,128 @@
 import { router } from 'expo-router';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CAMPAIGN, SKIRMISH, STARTER_DECK, aiDeckFor, createMatch, isUnlocked } from '../hexfort/engine';
-import { useHex } from '../hexfort/state/HexState';
-import { Board3D } from '../hexfort/three/Board3D';
-import { HxButton } from '../hexfort/ui/HxButton';
-import { hx } from '../hexfort/ui/theme';
+import { STARTER_DECK, aiDeckFor, createBrain, createMatch, currentSea, SEAS, type MatchState } from '../mareas/engine';
+import { useMareas } from '../mareas/state/MareasState';
+import { Scene3D } from '../mareas/three/Scene3D';
+import { Btn } from '../mareas/ui/Btn';
+import { RulesPanel } from '../mareas/ui/Rules';
+import { mt } from '../mareas/ui/theme';
 
-const noop = () => {};
+const demoMatch = (seed: number, nextId = 1): MatchState => {
+  const s = createMatch({ sea: 'laguna', playerDeck: STARTER_DECK, aiDeck: aiDeckFor('laguna'), seed, duration: 600 });
+  s.nextId = nextId;
+  return s;
+};
 
 export default function Home() {
   const insets = useSafeAreaInsets();
-  const { save, ready } = useHex();
-  const preview = useMemo(
-    () =>
-      createMatch({
-        map: SKIRMISH,
-        playerDeck: STARTER_DECK,
-        aiDeck: aiDeckFor(SKIRMISH),
-        seed: 3,
-      }),
-    [],
-  );
-  const next =
-    CAMPAIGN.find((m) => isUnlocked(save, m.id) && !save.won.includes(m.id)) ?? CAMPAIGN[CAMPAIGN.length - 1];
+  const { save, ready } = useMareas();
+  const [rules, setRules] = useState(false);
+  const demo = useRef<MatchState>(demoMatch(11));
+  const brains = useMemo(() => ({ player: createBrain(2), ai: createBrain(2) }), []);
+  // Restart the background battle when it ends.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (demo.current.result) demo.current = demoMatch(Math.floor(Math.random() * 1e6), demo.current.nextId);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  const sea = currentSea(save.shells);
+  const next = SEAS.find((s) => s.shells > save.shells);
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 16) }]}>
       <View style={styles.preview}>
-        <Board3D state={preview} highlights={{}} fx={[]} onTap={noop} showZoom={false} showcase />
+        <Scene3D state={demo} sea="laguna" brains={brains} selecting={null} demo />
         <View style={styles.titleWrap} pointerEvents="none">
-          <Text style={styles.title}>HEXFORT</Text>
-          <Text style={styles.subtitle}>Conquista · Construye · Combina</Text>
+          <Text style={styles.title}>MAREAS</Text>
+          <Text style={styles.subtitle}>Cuando baja, cruzan las criaturas · Cuando sube, zarpan los barcos</Text>
         </View>
       </View>
       <View style={styles.menu}>
-        <Text style={styles.progress}>
-          Campaña: {save.won.length}/{CAMPAIGN.length} mapas
-        </Text>
-        <HxButton
-          label={save.won.length === 0 ? 'Jugar' : `Jugar · ${next.name}`}
-          variant="gold"
+        <View style={styles.stats}>
+          <Text style={styles.stat}>🌊 {sea.name}</Text>
+          <Text style={styles.stat}>🐚 {save.shells}</Text>
+          <Text style={styles.stat}>⚪ {save.pearls}</Text>
+        </View>
+        {next && !next.comingSoon && (
+          <Text style={styles.progress}>
+            {next.shells - save.shells} conchas para llegar a {next.name}
+          </Text>
+        )}
+        <Btn
+          label={save.tutorialDone ? `Jugar en ${sea.name}` : 'Primera partida (guiada)'}
           disabled={!ready}
           onPress={() =>
             router.push({
-              pathname: '/hexfort/match/[map]',
-              params: { map: next.id },
+              pathname: '/mareas/match',
+              params: save.tutorialDone ? { sea: sea.id } : { sea: 'laguna', tutorial: '1' },
             })
           }
         />
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <HxButton label="Campaña" onPress={() => router.push('/hexfort/campaign')} />
+            <Btn label="Mares" variant="sea" onPress={() => router.push('/mareas/seas')} />
           </View>
           <View style={{ flex: 1 }}>
-            <HxButton label="Mi mazo" onPress={() => router.push('/hexfort/deck')} />
+            <Btn label="Mazos" variant="sea" onPress={() => router.push('/mareas/deck')} />
           </View>
         </View>
-        <HxButton
-          label="Partida rápida"
-          onPress={() =>
-            router.push({
-              pathname: '/hexfort/match/[map]',
-              params: { map: SKIRMISH.id },
-            })
-          }
-        />
-        <Pressable onPress={() => router.push('/echo')} style={styles.echo} accessibilityRole="button">
-          <Text style={styles.echoText}>Jugar a ECHO (juego anterior)</Text>
+        <Btn label="Cómo se juega" variant="ghost" onPress={() => setRules(true)} />
+        <Pressable onPress={() => router.push('/hexfort')} style={styles.old} accessibilityRole="button">
+          <Text style={styles.oldText}>Juegos anteriores: HEXFORT y ECHO</Text>
         </Pressable>
       </View>
+      {rules && (
+        <View style={styles.overlay}>
+          <RulesPanel onClose={() => setRules(false)} />
+        </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: hx.bg },
-  preview: { flex: 1, minHeight: 260 },
-  titleWrap: {
-    position: 'absolute',
-    top: 18,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
+  screen: { flex: 1, backgroundColor: mt.bg },
+  preview: { flex: 1, minHeight: 240 },
+  titleWrap: { position: 'absolute', top: 14, left: 16, right: 16, alignItems: 'center' },
   title: {
     color: '#FFFFFF',
-    fontSize: 46,
+    fontSize: 50,
     fontWeight: '900',
-    letterSpacing: 4,
-    textShadowColor: 'rgba(10,30,60,0.6)',
+    letterSpacing: 6,
+    textShadowColor: 'rgba(6,40,70,0.6)',
     textShadowOffset: { width: 0, height: 3 },
-    textShadowRadius: 6,
+    textShadowRadius: 8,
   },
   subtitle: {
-    color: '#0E2A4A',
+    color: '#073B5C',
     fontWeight: '800',
-    fontSize: 14,
-    letterSpacing: 1.5,
+    fontSize: 13,
+    textAlign: 'center',
+    backgroundColor: 'rgba(255,255,255,0.55)',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+    overflow: 'hidden',
   },
-  menu: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    gap: 12,
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
+  menu: { paddingHorizontal: 20, paddingTop: 14, gap: 10, width: '100%', maxWidth: 480, alignSelf: 'center' },
+  stats: { flexDirection: 'row', justifyContent: 'center', gap: 18 },
+  stat: { color: mt.text, fontWeight: '900', fontSize: 16 },
+  progress: { color: mt.dim, textAlign: 'center', fontWeight: '700', fontSize: 13 },
+  row: { flexDirection: 'row', gap: 10 },
+  old: { alignItems: 'center', paddingVertical: 6 },
+  oldText: { color: mt.faint, fontSize: 13, textDecorationLine: 'underline' },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(4,14,24,0.72)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
   },
-  progress: { color: hx.dim, textAlign: 'center', fontWeight: '700' },
-  row: { flexDirection: 'row', gap: 12 },
-  echo: { alignItems: 'center', paddingVertical: 8 },
-  echoText: { color: hx.faint, fontSize: 13, textDecorationLine: 'underline' },
 });
