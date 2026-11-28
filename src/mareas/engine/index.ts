@@ -4,3 +4,4 @@ export * from './seas';
 export * from './match';
 export * from './ai';
 export * from './save';
+export * from './map';

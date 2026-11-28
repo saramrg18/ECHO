@@ -9,9 +9,9 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 3,
     icon: '🦀',
     text: 'Tres cangrejos rápidos que pellizcan todo lo que encuentran.',
-    needsLane: true,
+    needsTarget: true,
     sea: 'laguna',
-    unit: { hp: 130, dmg: 26, interval: 0.8, range: 0.035, speed: 0.105, count: 3 },
+    unit: { hp: 130, dmg: 26, interval: 0.8, range: 0.7, speed: 1.47, count: 3 },
   },
   tortuga: {
     id: 'tortuga',
@@ -20,9 +20,9 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 4,
     icon: '🐢',
     text: 'Lenta y dura. Sabe nadar: la marea alta no la ahoga.',
-    needsLane: true,
+    needsTarget: true,
     sea: 'laguna',
-    unit: { hp: 950, dmg: 45, interval: 1.2, range: 0.04, speed: 0.06, amphibious: true },
+    unit: { hp: 950, dmg: 45, interval: 1.2, range: 0.75, speed: 0.84, amphibious: true },
   },
   morsa: {
     id: 'morsa',
@@ -31,9 +31,9 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 5,
     icon: '🦭',
     text: 'Golpea muy fuerte, pero se ahoga si la pilla la marea.',
-    needsLane: true,
+    needsTarget: true,
     sea: 'laguna',
-    unit: { hp: 700, dmg: 110, interval: 1.2, range: 0.045, speed: 0.085 },
+    unit: { hp: 700, dmg: 110, interval: 1.2, range: 0.8, speed: 1.19 },
   },
   bote: {
     id: 'bote',
@@ -41,10 +41,10 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: 'boat',
     cost: 2,
     icon: '🛶',
-    text: 'Barquita rápida y barata. Navega con marea alta.',
-    needsLane: true,
+    text: 'Barquita rápida y barata. Navega recto con marea alta.',
+    needsTarget: true,
     sea: 'laguna',
-    unit: { hp: 280, dmg: 38, interval: 0.9, range: 0.04, speed: 0.13 },
+    unit: { hp: 280, dmg: 38, interval: 0.9, range: 0.75, speed: 1.82 },
   },
   balandro: {
     id: 'balandro',
@@ -53,9 +53,9 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 4,
     icon: '⛵',
     text: 'Velero con cañón: dispara desde lejos con marea alta.',
-    needsLane: true,
+    needsTarget: true,
     sea: 'laguna',
-    unit: { hp: 520, dmg: 75, interval: 1.4, range: 0.2, speed: 0.09 },
+    unit: { hp: 520, dmg: 75, interval: 1.4, range: 2.8, speed: 1.26 },
   },
   puente: {
     id: 'puente',
@@ -63,8 +63,8 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: 'build',
     cost: 3,
     icon: '🌉',
-    text: 'Tus criaturas cruzan ese carril aunque suba la marea (30 s).',
-    needsLane: true,
+    text: 'Tablas en los caminos de una isla: tus criaturas no se ahogan ahí (30 s).',
+    needsTarget: true,
     sea: 'laguna',
   },
   dique: {
@@ -73,8 +73,8 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: 'build',
     cost: 2,
     icon: '🧱',
-    text: 'Un muro en tu lado del carril que frena a los rivales.',
-    needsLane: true,
+    text: 'Un muro en una isla: los rivales tienen que romperlo antes de conquistarla.',
+    needsTarget: true,
     sea: 'laguna',
   },
   ola: {
@@ -83,8 +83,8 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: 'spell',
     cost: 3,
     icon: '🌊',
-    text: 'Empuja hacia atrás a los rivales de un carril y les hace daño.',
-    needsLane: true,
+    text: 'Una ola en una isla: daña a los rivales cercanos y los empuja hacia atrás.',
+    needsTarget: true,
     sea: 'laguna',
   },
   pezglobo: {
@@ -94,9 +94,9 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 3,
     icon: '🐡',
     text: 'Corre y explota al tocar al primer rival. ¡Pum!',
-    needsLane: true,
+    needsTarget: true,
     sea: 'arrecife',
-    unit: { hp: 220, dmg: 0, interval: 0.5, range: 0.035, speed: 0.12, explode: { dmg: 320, radius: 0.09 } },
+    unit: { hp: 220, dmg: 0, interval: 0.5, range: 0.7, speed: 1.68, explode: { dmg: 320, radius: 1.26 } },
   },
   erizos: {
     id: 'erizos',
@@ -104,8 +104,8 @@ export const CARDS: Record<CardId, CardDef> = {
     kind: 'build',
     cost: 2,
     icon: '🦔',
-    text: 'Pinchos en mitad del carril: hacen daño a las criaturas rivales.',
-    needsLane: true,
+    text: 'Pinchos en una isla: hacen daño a las criaturas rivales que pisan.',
+    needsTarget: true,
     sea: 'arrecife',
   },
   galeon: {
@@ -115,9 +115,9 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 6,
     icon: '🚢',
     text: 'Barco enorme con cañones. Lento, pero aguanta muchísimo.',
-    needsLane: true,
+    needsTarget: true,
     sea: 'arrecife',
-    unit: { hp: 1400, dmg: 115, interval: 1.6, range: 0.22, speed: 0.06 },
+    unit: { hp: 1400, dmg: 115, interval: 1.6, range: 3.08, speed: 0.84 },
   },
   mareaviva: {
     id: 'mareaviva',
@@ -126,7 +126,7 @@ export const CARDS: Record<CardId, CardDef> = {
     cost: 2,
     icon: '🌙',
     text: 'Cambia la marea ahora mismo. ¡Pilla al rival por sorpresa!',
-    needsLane: false,
+    needsTarget: false,
     sea: 'arrecife',
   },
 };
@@ -153,6 +153,6 @@ export const KIND_LABEL: Record<CardDef['kind'], string> = {
 
 /** Structure numbers. */
 export const BRIDGE_TTL = 30;
-export const WALL = { hp: 650, ttl: 40, d: 0.22 };
-export const TRAP = { dps: 55, ttl: 25, d: 0.42, radius: 0.06 };
-export const WAVE = { dmg: 90, push: 0.16 };
+export const WALL = { hp: 650, ttl: 40 };
+export const TRAP = { dps: 55, ttl: 25, radius: 1.6 };
+export const WAVE = { dmg: 90, push: 2.2, radius: 2.6 };

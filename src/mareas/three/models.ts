@@ -404,3 +404,47 @@ export function trapGeometry(side: Side) {
     return build(parts);
   });
 }
+
+/** A small cannon tower for Roca islands, flag in the owner's colour (grey when nobody owns it). */
+export function fortGeometry(owner: Side | null) {
+  return cached(`fort-${owner ?? 'none'}`, () => {
+    const flag = owner ? TEAM[owner].main : '#D9D4C7';
+    const crenels: Part[] = [];
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      crenels.push({ g: box(0.14, 0.14, 0.14), color: C.stone, pos: [Math.cos(a) * 0.36, 1.02, Math.sin(a) * 0.36] });
+    }
+    return build([
+      { g: cyl(0.42, 0.52, 0.95, 8), color: C.stone, pos: [0, 0.47, 0] },
+      { g: cyl(0.48, 0.48, 0.1, 8), color: C.stoneDark, pos: [0, 0.95, 0] },
+      { g: cyl(0.08, 0.1, 0.55, 6), color: C.metal, pos: [0, 0.85, 0.35], rot: [Math.PI / 2.4, 0, 0] },
+      { g: box(0.18, 0.28, 0.04), color: C.woodDark, pos: [0, 0.16, 0.48] },
+      { g: cyl(0.015, 0.015, 0.7, 4), color: C.woodDark, pos: [0, 1.3, 0] },
+      { g: box(0.32, 0.2, 0.02), color: flag, pos: [0.16, 1.55, 0] },
+      ...crenels,
+    ]);
+  });
+}
+
+/** A giant clam with a pearl for Perla islands. */
+export function pearlGeometry(owner: Side | null) {
+  return cached(`pearl-${owner ?? 'none'}`, () => {
+    const flag = owner ? TEAM[owner].main : '#D9D4C7';
+    const ribs: Part[] = [];
+    for (let i = 0; i < 5; i++)
+      ribs.push({
+        g: box(0.06, 0.03, 0.55),
+        color: '#F2B8C6',
+        pos: [-0.3 + i * 0.15, 0.4, -0.18],
+        rot: [-0.9, (i - 2) * 0.22, 0],
+      });
+    return build([
+      { g: dome(0.45), color: '#F7C9D4', pos: [0, 0, 0], scale: [1, 0.45, 0.9] },
+      { g: dome(0.45), color: '#F7C9D4', pos: [0, 0.18, -0.25], rot: [-1.1, 0, 0], scale: [1, 0.45, 0.9] },
+      { g: ico(0.2, 1), color: '#FFFDF4', pos: [0, 0.22, 0.05] },
+      { g: cyl(0.015, 0.015, 0.8, 4), color: C.woodDark, pos: [0.5, 0.4, 0.2] },
+      { g: box(0.3, 0.18, 0.02), color: flag, pos: [0.65, 0.68, 0.2] },
+      ...ribs,
+    ]);
+  });
+}

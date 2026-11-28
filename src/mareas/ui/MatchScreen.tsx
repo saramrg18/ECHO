@@ -12,11 +12,11 @@ import {
   aiDeckFor,
   createBrain,
   createMatch,
+  islandsOf,
   playCard,
   playableDeck,
   seaById,
   type CardId,
-  type Lane,
   type MatchEvent,
   type MatchState,
   type Result,
@@ -45,6 +45,7 @@ interface Hud {
   hand: CardId[];
   next: CardId;
   result: Result | null;
+  isles: { player: number; ai: number };
 }
 
 const snapshot = (s: MatchState): Hud => ({
@@ -58,6 +59,7 @@ const snapshot = (s: MatchState): Hud => ({
   hand: [...s.players.player.hand],
   next: s.players.player.queue[0],
   result: s.result,
+  isles: { player: islandsOf(s, 'player'), ai: islandsOf(s, 'ai') },
 });
 
 export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }) {
@@ -112,6 +114,9 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
   }, [banner]);
 
   const tutStep: TutorialStep | null = step >= 0 && step < TUTORIAL.length ? TUTORIAL[step] : null;
+  // If the card a step waits for was already played, the step gets a button instead.
+  const waitCard = tutStep?.waitCard && hud.hand.includes(tutStep.waitCard) ? tutStep.waitCard : undefined;
+  const tutButton = tutStep ? (tutStep.button ?? (tutStep.waitCard && !waitCard ? 'Siguiente' : undefined)) : undefined;
   const advance = useCallback(() => {
     setStep((s) => {
       const n = s + 1;
@@ -139,6 +144,13 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
   const onEvents = useCallback(
     (events: MatchEvent[]) => {
       for (const e of events) {
+        if (e.type === 'capture') {
+          const name = state.current.map.islands[e.island].name;
+          showBanner(
+            e.side === 'player' ? `🏝️ ¡Has conquistado ${name}!` : `🏝️ El rival ha conquistado ${name}`,
+            e.side === 'player' ? mt.player : mt.ai,
+          );
+        }
         if (e.type === 'tide') {
           haptic.tide();
           showBanner(
@@ -159,10 +171,10 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
   const selectedCard = selected !== null ? hud.hand[selected] : null;
   const selDef = selectedCard ? CARDS[selectedCard] : null;
 
-  const tryPlay = (lane: Lane | null) => {
+  const tryPlay = (island: number | null) => {
     if (selected === null) return;
     const card = state.current.players.player.hand[selected];
-    const err = playCard(state.current, 'player', selected, lane);
+    const err = playCard(state.current, 'player', selected, island);
     if (err === 'energy') {
       haptic.fail();
       showBanner('Te falta energía ⚡', mt.bad);
@@ -171,20 +183,20 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
     if (!err) {
       haptic.play();
       setHud(snapshot(state.current));
-      if (tutStep?.waitCard === card) advance();
+      if (waitCard === card) advance();
     }
   };
 
   const tapCard = (i: number) => {
     if (hud.result) return;
     const card = hud.hand[i];
-    if (tutStep?.waitCard && tutStep.waitCard !== card) {
-      showBanner(`Toca la carta ${CARDS[tutStep.waitCard].name}`, mt.low);
+    if (waitCard && waitCard !== card) {
+      showBanner(`Toca la carta ${CARDS[waitCard].name}`, mt.low);
       return;
     }
     if (selected === i) {
       // Second tap plays cards that do not need a lane.
-      if (!CARDS[card].needsLane) return tryPlay(null);
+      if (!CARDS[card].needsTarget) return tryPlay(null);
       return setSelected(null);
     }
     if (hud.energy + 1e-6 < CARDS[card].cost) {
@@ -200,9 +212,9 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
   useEffect(() => {
     tryPlayRef.current = tryPlay;
   });
-  const onLaneTap = useCallback((lane: Lane) => tryPlayRef.current(lane), []);
+  const onIslandTap = useCallback((island: number) => tryPlayRef.current(island), []);
 
-  const selecting = selDef?.needsLane
+  const selecting = selDef?.needsTarget
     ? selDef.kind === 'spell'
       ? 'spell'
       : selDef.kind === 'build'
@@ -218,8 +230,10 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
   };
 
   const hint = selDef
-    ? selDef.needsLane
-      ? `Toca un camino para usar ${selDef.name}`
+    ? selDef.needsTarget
+      ? selDef.unit
+        ? `Toca la isla a la que mandas ${selDef.name}`
+        : `Toca una isla para usar ${selDef.name}`
       : `Toca otra vez ${selDef.name} para usarla`
     : null;
 
@@ -236,7 +250,7 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
         <Pressable onPress={() => setMenu('pause')} style={styles.pauseBtn} accessibilityLabel="Pausa">
           <Text style={styles.pauseText}>II</Text>
         </Pressable>
-        <LighthouseBar label="Faro rival" hp={hud.hp.ai} max={hud.max.ai} color={mt.ai} />
+        <LighthouseBar label="Faro rival" isles={hud.isles.ai} hp={hud.hp.ai} max={hud.max.ai} color={mt.ai} />
         <View style={styles.timer}>
           <Text style={[styles.timerText, timeLeft <= RUSH_TIME && { color: mt.energy }]}>
             {mm}:{ss}
@@ -250,7 +264,7 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
           sea={sea}
           brains={brains}
           selecting={selecting}
-          onLaneTap={onLaneTap}
+          onIslandTap={onIslandTap}
           onEvents={onEvents}
         />
         <TideClock tide={hud.tide} left={hud.tideLeft} highlight={tutStep?.focus === 'clock'} />
@@ -270,16 +284,11 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
             <Text style={styles.hintText}>{hint}</Text>
           </Animated.View>
         ) : null}
-        {tutStep ? (
-          <Animated.View
-            key={step}
-            entering={panelIn}
-            style={[styles.tutorial, tutStep.focus === 'top' && { top: 8, bottom: undefined }]}
-            pointerEvents="box-none"
-          >
+        {tutStep && selected === null ? (
+          <Animated.View key={step} entering={panelIn} style={styles.tutorial} pointerEvents="box-none">
             <View style={styles.tutorialBox}>
               <Text style={styles.tutorialText}>{tutStep.text}</Text>
-              {tutStep.button ? <Btn small label={tutStep.button} onPress={advance} /> : null}
+              {tutButton ? <Btn small label={tutButton} onPress={advance} /> : null}
             </View>
           </Animated.View>
         ) : null}
@@ -288,7 +297,13 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
       {/* Player area */}
       <View style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 10) }]}>
         <View style={styles.row}>
-          <LighthouseBar label="Tu faro" hp={hud.hp.player} max={hud.max.player} color={mt.player} />
+          <LighthouseBar
+            label="Tu faro"
+            isles={hud.isles.player}
+            hp={hud.hp.player}
+            max={hud.max.player}
+            color={mt.player}
+          />
         </View>
         <View style={styles.hand}>
           {hud.hand.map((id, i) => (
@@ -299,7 +314,7 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
               energy={hud.energy}
               note={noteFor(id)}
               onPress={() => tapCard(i)}
-              dim={!!tutStep?.waitCard && tutStep.waitCard !== id}
+              dim={!!waitCard && waitCard !== id}
             />
           ))}
           <View style={styles.next}>
@@ -370,12 +385,25 @@ export function MatchScreen({ sea, tutorial }: { sea: SeaId; tutorial: boolean }
   );
 }
 
-function LighthouseBar({ label, hp, max, color }: { label: string; hp: number; max: number; color: string }) {
+function LighthouseBar({
+  label,
+  hp,
+  max,
+  color,
+  isles,
+}: {
+  label: string;
+  hp: number;
+  max: number;
+  color: string;
+  isles: number;
+}) {
   const k = Math.max(0, hp / max);
   return (
     <View style={styles.lh}>
       <Text style={styles.lhLabel}>
         🗼 {label} <Text style={{ color: mt.dim }}>{Math.ceil(hp)}</Text>
+        {isles > 0 ? <Text style={{ color: mt.dim }}>{`  ·  🏝️ ${isles}`}</Text> : null}
       </Text>
       <View style={styles.lhTrack}>
         <View style={[styles.lhFill, { width: `${k * 100}%`, backgroundColor: color }]} />

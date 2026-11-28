@@ -61,8 +61,21 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, paddingBottom: 40, gap: 12, width: '100%', maxWidth: 520, alignSelf: 'center' },
-  card: { backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: 18, borderWidth: 1, borderColor: colors.border },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
   sep: { height: 1, backgroundColor: colors.border },
-  section: { color: colors.textDim, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase', marginTop: 16, marginLeft: 4 },
+  section: {
+    color: colors.textDim,
+    fontSize: 12,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    marginTop: 16,
+    marginLeft: 4,
+  },
   warn: { color: colors.text, fontSize: 15 },
 });

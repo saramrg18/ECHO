@@ -10,7 +10,7 @@ export interface TutorialStep {
   waitCard?: CardId;
   /** Or when this returns true (gets the seconds since the step started). */
   until?: (s: MatchState, elapsed: number) => boolean;
-  focus?: 'clock' | 'top';
+  focus?: 'clock';
 }
 
 export const TUTORIAL: TutorialStep[] = [
@@ -20,33 +20,38 @@ export const TUTORIAL: TutorialStep[] = [
     button: 'Siguiente',
   },
   {
-    text: 'Entre las dos islas hay tres caminos de arena. La marea cambia cada 20 segundos, y este reloj te avisa de cuándo.',
+    text: 'En medio hay islas pequeñas. Si conquistas una 💎 Perla, ganas energía más rápido. Si conquistas una 🏰 Roca, su cañón te defiende.',
+    pause: true,
+    button: 'Siguiente',
+  },
+  {
+    text: 'La marea cambia cada 20 segundos (mira el reloj). Con la marea BAJA 🏖️ aparecen caminos de arena entre las islas, y cada vez son distintos.',
     pause: true,
     button: 'Siguiente',
     focus: 'clock',
   },
   {
-    text: 'Ahora la marea está BAJA 🏖️: la arena se ve y las criaturas pueden cruzar. Toca la carta Cangrejos y luego uno de los tres caminos.',
+    text: 'Toca la carta Cangrejos y luego la 💎 isla del centro. Irán por la arena, la conquistarán y se quedarán a defenderla.',
     pause: true,
     waitCard: 'cangrejos',
   },
   {
-    text: '¡Bien! Tus cangrejos corren hacia el faro rival. Ojo: si sube la marea y siguen en la arena, se ahogan.',
+    text: '¡Bien! Ojo: si sube la marea y siguen en un camino de arena, se ahogan. En las islas siempre están a salvo.',
     pause: false,
     until: (s) => s.tide === 'high' && s.water > 0.5,
   },
   {
-    text: '¡Subió la marea 🌊! La arena está bajo el agua y es el turno de los barcos. Toca la carta Bote y luego un camino.',
+    text: '¡Subió la marea 🌊! Ahora los barcos navegan por donde quieran. Toca la carta Bote y luego la isla rival 🎯 para atacar su faro.',
     pause: true,
     waitCard: 'bote',
   },
   {
-    text: 'Los barcos también tienen prisa: si baja la marea y siguen en mitad del camino, se quedan varados.',
+    text: 'Fíjate: bajo el agua se ven los caminos que se abrirán en la próxima marea baja. Así puedes planear tu jugada.',
     pause: false,
-    until: (_s, t) => t > 6,
+    until: (_s, t) => t > 7,
   },
   {
-    text: 'Truco: si juegas una carta con la marea "equivocada", espera en tu playa hasta su marea. ¡Ahora el rival también juega. Apaga su faro!',
+    text: 'Truco: si juegas una carta con la marea "equivocada", espera en tu isla hasta que pueda salir. ¡Ahora el rival también juega. Apaga su faro!',
     pause: true,
     button: '¡A jugar!',
   },

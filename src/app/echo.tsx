@@ -31,7 +31,8 @@ export default function Home() {
             <Text style={styles.progressValue}>
               {done} <Text style={{ color: colors.textFaint }}>/ {total} niveles</Text>
               {'   '}
-              <Text style={{ color: colors.player }}>★</Text> {stars} <Text style={{ color: colors.textFaint }}>/ {TOTAL_STARS}</Text>
+              <Text style={{ color: colors.player }}>★</Text> {stars}{' '}
+              <Text style={{ color: colors.textFaint }}>/ {TOTAL_STARS}</Text>
             </Text>
           </View>
           <View style={styles.track}>
