@@ -1,5 +1,7 @@
 import {
   CARDS,
+  HOME,
+  findPath,
   DECK_SIZE,
   SEAS,
   STARTER_DECK,
@@ -33,67 +35,103 @@ function give(s: MatchState, card: keyof typeof CARDS) {
   s.players.player.energy = 10;
 }
 
-describe('tides', () => {
-  it('switches every period', () => {
+const CENTER = 4;
+const RIVAL = 1;
+
+describe('tides and islands', () => {
+  it('switches every period and picks new sandbars for each low tide', () => {
     const s = make();
+    const first = [...s.openBars];
     expect(s.tide).toBe('low');
     run(s, TIDE_PERIOD + 0.1);
     expect(s.tide).toBe('high');
+    expect(s.openBars).not.toEqual(first);
+    // Always a way across.
+    expect(findPath(s.map, HOME.player, HOME.ai, (b) => s.openBars.includes(b.id))).not.toBeNull();
     run(s, TIDE_PERIOD);
     expect(s.tide).toBe('low');
   });
 
-  it('drowns creatures caught on the sand', () => {
-    const s = make();
+  it('open sandbars are mirror-fair', () => {
+    for (let seed = 1; seed < 30; seed++) {
+      const s = make({ seed });
+      const mirror: Record<number, number> = { 0: 1, 1: 0, 2: 3, 3: 2, 4: 5, 5: 4, 6: 7, 7: 6, 8: 9, 9: 8 };
+      for (const b of s.openBars) expect(s.openBars).toContain(mirror[b]);
+    }
+  });
+
+  it('creatures walk to an island, conquer it and stay', () => {
+    const s = make({ tutorial: true });
     give(s, 'morsa');
-    run(s, 12);
-    playCard(s, 'player', 0, 0);
-    run(s, 9);
-    const m = s.units.find((u) => u.card === 'morsa');
-    expect(m?.state).toBe('drowning');
+    playCard(s, 'player', 0, CENTER);
+    run(s, 15);
+    const m = s.units.find((u) => u.card === 'morsa')!;
+    expect(m.node).toBe(CENTER);
+    expect(s.islands[CENTER].owner).toBe('player');
+  });
+
+  it('drowns creatures caught on a sandbar', () => {
+    const s = make({ tutorial: true });
+    run(s, 16);
+    give(s, 'morsa');
+    playCard(s, 'player', 0, RIVAL);
+    run(s, 6);
+    expect(s.units.find((u) => u.card === 'morsa')?.state).toBe('drowning');
     run(s, 3);
     expect(s.units.find((u) => u.card === 'morsa')).toBeUndefined();
     expect(s.stats.drowned.player).toBe(1);
   });
 
-  it('tortoises swim and bridges save creatures', () => {
-    const s = make();
-    give(s, 'tortuga');
-    playCard(s, 'player', 0, 0);
-    give(s, 'morsa');
-    playCard(s, 'player', 0, 2);
+  it('a bridge saves creatures and lets them cross at high tide', () => {
+    const s = make({ tutorial: true });
+    run(s, TIDE_PERIOD + 2);
     give(s, 'puente');
     playCard(s, 'player', 0, 2);
-    run(s, 25);
-    expect(s.units.find((u) => u.card === 'tortuga')).toBeDefined();
-    expect(s.units.find((u) => u.card === 'morsa')?.state).not.toBe('drowning');
-  });
-
-  it('creatures played at high tide wait on the beach', () => {
-    const s = make();
-    run(s, TIDE_PERIOD + 1);
     give(s, 'morsa');
-    playCard(s, 'player', 0, 1);
-    run(s, 5);
+    playCard(s, 'player', 0, 2);
+    run(s, 8);
     const m = s.units.find((u) => u.card === 'morsa')!;
-    expect(m.state).toBe('wait');
-    expect(m.d).toBeLessThan(0.06);
+    expect(m.node).toBe(2);
+    expect(m.state).not.toBe('drowning');
   });
 
-  it('boats wait at low tide and get stranded when it falls', () => {
-    const s = make();
+  it('creatures with no open way wait at home; tortoises swim', () => {
+    const s = make({ tutorial: true });
+    run(s, TIDE_PERIOD + 2);
+    give(s, 'morsa');
+    playCard(s, 'player', 0, CENTER);
+    give(s, 'tortuga');
+    playCard(s, 'player', 0, CENTER);
+    run(s, 4);
+    expect(s.units.find((u) => u.card === 'morsa')!.state).toBe('wait');
+    expect(s.units.find((u) => u.card === 'tortuga')!.next).not.toBeNull();
+  });
+
+  it('boats wait at low tide, sail at high tide and run aground when it falls', () => {
+    const s = make({ tutorial: true });
     give(s, 'bote');
-    playCard(s, 'player', 0, 1);
+    playCard(s, 'player', 0, RIVAL);
     run(s, 5);
     expect(s.units[0].state).toBe('wait');
     run(s, TIDE_PERIOD - 3);
     expect(s.units[0].state).toBe('move');
-    // Sail for 3 seconds, then flip the tide to low with a surprise tide.
-    run(s, 2);
+    run(s, 0.5);
     s.players.player.hand[1] = 'mareaviva';
+    s.players.player.energy = 10;
     playCard(s, 'player', 1, null);
-    run(s, 1);
+    run(s, 1.5);
     expect(s.units[0].state).toBe('stranded');
+  });
+
+  it('owning a Perla island gives extra energy', () => {
+    const a = make({ tutorial: true });
+    const b = make({ tutorial: true });
+    a.players.player.energy = b.players.player.energy = 0;
+    b.islands[CENTER].owner = 'player';
+    b.islands[CENTER].capture = 1;
+    run(a, 4);
+    run(b, 4);
+    expect(b.players.player.energy).toBeGreaterThan(a.players.player.energy + 0.5);
   });
 });
 
@@ -104,29 +142,34 @@ describe('cards', () => {
     const [first] = p.hand;
     const next = p.queue[0];
     p.energy = 10;
-    expect(playCard(s, 'player', 0, 1)).toBeNull();
+    expect(playCard(s, 'player', 0, CENTER)).toBeNull();
     expect(p.hand[0]).toBe(next);
     expect(p.queue[p.queue.length - 1]).toBe(first);
     expect(p.energy).toBe(10 - CARDS[first].cost);
   });
 
-  it('refuses without energy', () => {
+  it('refuses without energy or without a target', () => {
     const s = make();
     give(s, 'morsa');
+    expect(playCard(s, 'player', 0, null)).toBe('target');
     s.players.player.energy = 1;
-    expect(playCard(s, 'player', 0, 1)).toBe('energy');
+    expect(playCard(s, 'player', 0, CENTER)).toBe('energy');
   });
 
-  it('a wave pushes rivals back', () => {
-    const s = make();
+  it('a wave hurts and pushes rivals back', () => {
+    const s = make({ tutorial: true });
+    s.aiActive = true;
     s.players.ai.hand[0] = 'morsa';
     s.players.ai.energy = 10;
-    playCard(s, 'ai', 0, 1);
-    run(s, 6);
-    const before = s.units[0].d;
+    playCard(s, 'ai', 0, HOME.player);
+    run(s, 10);
+    const m = s.units[0];
+    const before = Math.hypot(m.x, m.z - 10.2);
+    const hp = m.hp;
     give(s, 'ola');
-    playCard(s, 'player', 0, 1);
-    expect(s.units[0].d).toBeGreaterThan(before);
+    playCard(s, 'player', 0, CENTER);
+    expect(m.hp).toBeLessThan(hp);
+    expect(Math.hypot(m.x, m.z - 10.2)).toBeGreaterThan(before);
   });
 
   it('every card has a sea and every sea card exists', () => {

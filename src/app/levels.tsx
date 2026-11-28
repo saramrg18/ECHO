@@ -38,7 +38,9 @@ export default function Levels() {
                       key={l.id}
                       accessibilityRole="button"
                       accessibilityLabel={
-                        unlocked ? `Nivel ${n}${rec ? `, completado en ${rec.bestMoves} movimientos, ${levelStars(l.id, rec.bestMoves)} estrellas` : ''}` : `Nivel ${n}, bloqueado`
+                        unlocked
+                          ? `Nivel ${n}${rec ? `, completado en ${rec.bestMoves} movimientos, ${levelStars(l.id, rec.bestMoves)} estrellas` : ''}`
+                          : `Nivel ${n}, bloqueado`
                       }
                       disabled={!unlocked}
                       onPress={() => router.push({ pathname: '/play/[id]', params: { id: l.id } })}

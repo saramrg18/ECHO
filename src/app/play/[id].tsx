@@ -108,7 +108,13 @@ function Game({ level }: { level: Level }) {
               <Text style={styles.hintBtnText}>?</Text>
               <Text style={styles.hintCount}>{hintsLeft}</Text>
             </Tap>
-            <Tap accessibilityRole="button" accessibilityLabel="Pausa" onPress={() => setPaused(true)} style={styles.iconBtn} hitSlop={8}>
+            <Tap
+              accessibilityRole="button"
+              accessibilityLabel="Pausa"
+              onPress={() => setPaused(true)}
+              style={styles.iconBtn}
+              hitSlop={8}
+            >
               <PauseIcon size={16} color={colors.text} />
             </Tap>
           </View>
@@ -126,7 +132,12 @@ function Game({ level }: { level: Level }) {
         </View>
         <View style={styles.stat}>
           <Text style={styles.statLabel}>Movimientos</Text>
-          <Text style={[styles.statValue, level.maxMoves !== undefined && level.maxMoves - state.turn <= 2 && { color: colors.player }]}>
+          <Text
+            style={[
+              styles.statValue,
+              level.maxMoves !== undefined && level.maxMoves - state.turn <= 2 && { color: colors.player },
+            ]}
+          >
             {state.turn}
             {level.maxMoves !== undefined ? <Text style={styles.statMax}> / {level.maxMoves}</Text> : null}
           </Text>
@@ -172,8 +183,17 @@ function Game({ level }: { level: Level }) {
           onPress={game.undo}
           disabled={!game.canUndo || Boolean(win)}
         />
-        {settings.showDpad ? <DPad onPress={game.move} onPreview={setPreviewDir} highlight={hintDir} disabled={!playing} size={58} /> : <Text style={styles.swipeHint}>Desliza para mover</Text>}
-        <Button accessibilityLabel="Reiniciar" icon={<RestartIcon size={20} color={colors.text} />} onPress={game.restart} disabled={state.turn === 0} />
+        {settings.showDpad ? (
+          <DPad onPress={game.move} onPreview={setPreviewDir} highlight={hintDir} disabled={!playing} size={58} />
+        ) : (
+          <Text style={styles.swipeHint}>Desliza para mover</Text>
+        )}
+        <Button
+          accessibilityLabel="Reiniciar"
+          icon={<RestartIcon size={20} color={colors.text} />}
+          onPress={game.restart}
+          disabled={state.turn === 0}
+        />
       </View>
 
       {paused ? (
@@ -181,7 +201,11 @@ function Game({ level }: { level: Level }) {
           <Text style={styles.ovTitle}>Pausa</Text>
           <View style={{ alignSelf: 'stretch' }}>
             <ToggleRow label="Sonido" value={settings.sound} onChange={(v) => app.updateSettings({ sound: v })} />
-            <ToggleRow label="Vibración" value={settings.haptics} onChange={(v) => app.updateSettings({ haptics: v })} />
+            <ToggleRow
+              label="Vibración"
+              value={settings.haptics}
+              onChange={(v) => app.updateSettings({ haptics: v })}
+            />
           </View>
           <Button variant="primary" label="Continuar" style={styles.full} onPress={() => setPaused(false)} />
           <Button
